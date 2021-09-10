@@ -13,17 +13,30 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.example.interntask.database.User;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.AdapterViewHolder> {
-    private Context context;
-    private ArrayList<ExampleItem> exampleList;
+//    private Context context;
+//    private ArrayList<ExampleItem> exampleList;
+//
+//    public Adapter(Context context, ArrayList<ExampleItem> exampleList) {
+//        this.context = context;
+//        this.exampleList = exampleList;
+//    }
 
-    public Adapter(Context context, ArrayList<ExampleItem> exampleList) {
+    private Context context;
+    private List<User> userList;
+
+    public Adapter(Context context) {
         this.context = context;
-        this.exampleList = exampleList;
+    }
+    public void setUserList(List<User> userList){
+        this.userList = userList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -35,40 +48,35 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AdapterViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull AdapterViewHolder holder, int position) {
-        ExampleItem currentItem = exampleList.get(position);
+//        ExampleItem currentItem = exampleList.get(position);
+//
+//        String imageUrl = currentItem.getImageUrl();
+//        String countryName = currentItem.getCountryName();
+//        String capitalName = currentItem.getCapitalName();
+//        String region = currentItem.getRegionName();
+//        String subRegion = currentItem.getSubRegionName();
+//        String population = currentItem.getPopulation();
 
-        String imageUrl = currentItem.getImageUrl();
-        String countryName = currentItem.getCountryName();
-        String capitalName = currentItem.getCapitalName();
-        String region = currentItem.getRegionName();
-        String subRegion = currentItem.getSubRegionName();
-        String population = currentItem.getPopulation();
 
-//        Picasso.get()
-//                .load(imageUrl)
-//                .fit()
-//                .centerInside()
-//                .placeholder(R.drawable.ic_launcher_background)
-//                .into(holder.imgFlag);
+        GlideApp.with(context).load(this.userList.get(position).flag).into(holder.imgFlag);
 
-//        Glide.with(context)
-//                .load(imageUrl)
-//                .placeholder(R.drawable.ic_launcher_background)
-//                .into(holder.imgFlag);
+        holder.txtViewCountryName.setText(this.userList.get(position).name);
+        holder.txtViewCapitalName.setText(this.userList.get(position).capital);
+        holder.txtViewRegion.setText(this.userList.get(position).region);
+        holder.txtViewSubRegion.setText(this.userList.get(position).subRegion);
+        holder.txtViewPopulation.setText(this.userList.get(position).population);
 
-        GlideApp.with(context).load(imageUrl).into(holder.imgFlag);
-
-        holder.txtViewCountryName.setText("Name : " + countryName);
-        holder.txtViewCapitalName.setText("Capital Name : " + capitalName);
-        holder.txtViewRegion.setText("Region : " + region);
-        holder.txtViewSubRegion.setText("Sub Region : " + subRegion);
-        holder.txtViewPopulation.setText("Population : " + population);
+//        holder.txtViewCountryName.setText("Name : " + countryName);
+//        holder.txtViewCapitalName.setText("Capital Name : " + capitalName);
+//        holder.txtViewRegion.setText("Region : " + region);
+//        holder.txtViewSubRegion.setText("Sub Region : " + subRegion);
+//        holder.txtViewPopulation.setText("Population : " + population);
 
     }
 
     @Override
     public int getItemCount() {
-        return exampleList.size();
+        return userList.size();
     }
 
     public class AdapterViewHolder extends RecyclerView.ViewHolder {

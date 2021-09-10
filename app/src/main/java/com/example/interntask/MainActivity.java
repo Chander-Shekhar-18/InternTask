@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -15,6 +16,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.interntask.database.AppDatabase;
+import com.example.interntask.database.User;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,20 +34,39 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
     private static final String JSON_URL = "https://restcountries.eu/rest/v2/region/asia";
-
     private Adapter adapter;
-    private ArrayList<ExampleItem> mExampleList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FloatingActionButton btnDeleteAllData = findViewById(R.id.btnFab);
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
-        mExampleList = new ArrayList<>();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new Adapter(this);
+        recyclerView.setAdapter(adapter);
 
         extractData();
+
+        loadCountryData();
+
+        btnDeleteAllData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppDatabase db = AppDatabase.getDbInstance(MainActivity.this);
+                db.userDao().deleteAllCountryData();
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity.this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loadCountryData() {
+        AppDatabase db = AppDatabase.getDbInstance(this.getApplicationContext());
+        List<User> userList = db.userDao().getAllUsers();
+        adapter.setUserList(userList);
     }
 
     private void extractData() {
@@ -52,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        Toast.makeText(MainActivity.this, "Data Fetched Successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Data Added To Database Successfully", Toast.LENGTH_SHORT).show();
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 JSONObject jsonObject = response.getJSONObject(i);
@@ -64,15 +87,21 @@ public class MainActivity extends AppCompatActivity {
                                 String subRegion = jsonObject.getString("subregion");
                                 String population = jsonObject.getString("population");
 
-                                mExampleList.add(new ExampleItem(imgFlag, countryName, capitalName, region, subRegion, population));
+                                AppDatabase db = AppDatabase.getDbInstance(MainActivity.this);
 
+                                User user = new User();
+                                user.flag = imgFlag;
+                                user.name = countryName;
+                                user.capital = capitalName;
+                                user.region = region;
+                                user.subRegion = subRegion;
+                                user.population = population;
+
+                                db.userDao().insertUser(user);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-                        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                        adapter = new Adapter(MainActivity.this, mExampleList);
-                        recyclerView.setAdapter(adapter);
                     }
                 }, new Response.ErrorListener() {
             @Override
